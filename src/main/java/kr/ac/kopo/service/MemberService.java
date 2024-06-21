@@ -9,12 +9,12 @@ public class MemberService {
 	
 	private MemberDAO memberDao = new MemberDAO();
 	
-	public boolean createMember(MemberVO member) {
-		return memberDao.insertMember(member);
+	public void createMember(MemberVO member) {
+		memberDao.insertMember(member);
 	}
 	
-	public MemberVO searchMember(MemberVO memberVO) {
-		MemberVO member = memberDao.selectOneMember(memberVO);
+	public MemberVO searchMember(String id, String password) {
+		MemberVO member = memberDao.selectOneMember(id, password);
 		return member;
 	}
 	

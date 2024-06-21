@@ -12,9 +12,8 @@ import kr.ac.kopo.vo.MemberVO;
 public class MemberDAO {
 	
 	// 멤버 하나 추가
-	public boolean insertMember(MemberVO member) {
+	public void insertMember(MemberVO member) {
 		StringBuilder sql = new StringBuilder();
-		int tmp = 0;
 		sql.append("INSERT INTO TBL_MEMBER(MEMBER_CD, MEMBER_ID, MEMBER_PW, MEMBER_NM, MEMBER_BIRTHDATE, MEMBER_PHONE) ");
 		sql.append(" VALUES (SEQ_TBL_MEMBER_MEMBER_CD.NEXTVAL, ?, ?, ?, TO_DATE(?, 'YYYYMMDD'), ?) ");
 		try(
@@ -26,13 +25,11 @@ public class MemberDAO {
 			pstmt.setString(3, member.getMemberNm());
 			pstmt.setString(4, member.getMemberBirthDate());
 			pstmt.setString(5, member.getMemberPhone());
-			tmp = pstmt.executeUpdate();
+			pstmt.executeUpdate();
 			
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		
-		return (tmp > 0) ? true: false;
 	}
 	
 	// 아이디와 비밀번호로 멤버 찾기
@@ -109,7 +106,7 @@ public class MemberDAO {
 	}
 	
 	// 회원 하나 찾기
-	public MemberVO selectOneMember(MemberVO memberVO) {
+	public MemberVO selectOneMember(String id, String password) {
 		MemberVO member = null;
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT * ");
@@ -121,8 +118,8 @@ public class MemberDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 		){
-			pstmt.setString(1, memberVO.getMemberId());
-			pstmt.setString(2, memberVO.getMemberPw());
+			pstmt.setString(1, id);
+			pstmt.setString(2, password);
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
 				member = new MemberVO(rs.getInt("MEMBER_CD"), rs.getString("MEMBER_ID"), rs.getString("MEMBER_PW"), rs.getString("MEMBER_NM")

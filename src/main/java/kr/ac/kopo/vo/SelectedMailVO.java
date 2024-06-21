@@ -14,20 +14,6 @@ public class SelectedMailVO {
 		super();
 	}
 	
-	
-
-	public SelectedMailVO(int mailCd, String mailTitle, String mailSenderId, String mailReceiverId, int mailOpenChk,
-			String mailSentDate) {
-		super();
-		this.mailCd = mailCd;
-		this.mailTitle = mailTitle;
-		this.mailSenderId = mailSenderId;
-		this.mailReceiverId = mailReceiverId;
-		this.mailOpenChk = mailOpenChk;
-		this.mailSentDate = mailSentDate;
-	}
-
-
 
 	public SelectedMailVO(int mailCd, String mailTitle, String mailContent, String mailSenderId, String mailReceiverId,
 			 int mailOpenChk, String mailSentDate) {

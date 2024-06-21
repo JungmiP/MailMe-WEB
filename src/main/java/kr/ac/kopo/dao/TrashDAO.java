@@ -3,10 +3,11 @@ package kr.ac.kopo.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+import kr.ac.kopo.ui.MailMenuUI;
 import kr.ac.kopo.util.ConnectionFactory;
 
 public class TrashDAO {
-	public void insertTrash(int mailCd, int memberCd) {
+	public void insertTrash(int mailCd) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO TBL_TRASH(TRASH_CD, MAIL_CD, MEMBER_CD) ");
 		sql.append(" VALUES (SEQ_TBL_TRASH_TRASH_CD.NEXTVAL, ?, ?) ");
@@ -15,7 +16,7 @@ public class TrashDAO {
 			PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 		) {
 			pstmt.setInt(1, mailCd);
-			pstmt.setInt(2, memberCd);			
+			pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());			
 			pstmt.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -59,7 +60,7 @@ public class TrashDAO {
 	
 	
 	// 전체 삭제
-	public void insertMailsToTrash(String mode, int memberCd) {
+	public void insertMailsToTrash(String mode) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO TBL_TRASH (TRASH_CD, MAIL_CD, MEMBER_CD) ");
 		sql.append("SELECT SEQ_TBL_TRASH_TRASH_CD.NEXTVAL, MAIL_CD, MAIL_" + mode + "_CD FROM TBL_MAIL ");
@@ -72,15 +73,15 @@ public class TrashDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 				) {
-			pstmt.setInt(1, memberCd);
-			pstmt.setInt(2, memberCd);
+			pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+			pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
 			pstmt.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	} 
 	
-	public void insertMailsToTrash(String mode, int memberCd, String spamWord) {
+	public void insertMailsToTrash(String mode, String spamWord) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO TBL_TRASH (TRASH_CD, MAIL_CD, MEMBER_CD) ");
 		sql.append("SELECT SEQ_TBL_TRASH_TRASH_CD.NEXTVAL, MAIL_CD, MAIL_" + mode + "_CD FROM TBL_MAIL ");
@@ -94,8 +95,8 @@ public class TrashDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			) {
-				pstmt.setInt(1, memberCd);
-				pstmt.setInt(2, memberCd);
+				pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+				pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
 				pstmt.setString(3, spamWord);
 				pstmt.setString(4, spamWord);
 				pstmt.executeUpdate();
@@ -105,7 +106,7 @@ public class TrashDAO {
 	} 
 	
 	// 휴지통 여러개 영구 삭제
-	public void updateAllPermanent(int memberCd) {
+	public void updateAllPermanent() {
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE TBL_TRASH ");
 		sql.append("   SET PERMANENT = 1 ");
@@ -114,7 +115,7 @@ public class TrashDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			) {
-				pstmt.setInt(1, memberCd);
+				pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
 				pstmt.executeUpdate();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -123,7 +124,7 @@ public class TrashDAO {
 	
 	// 스팸메일함 전체 삭제
 	
-	public void insertSpamMailsToTrash(String spamWord, int memberCd) {
+	public void insertSpamMailsToTrash(String spamWord) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO TBL_TRASH (TRASH_CD, MAIL_CD, MEMBER_CD) ");
 		sql.append(" SELECT SEQ_TBL_TRASH_TRASH_CD.NEXTVAL, MAIL_CD, MAIL_RECEIVER_CD ");
@@ -135,8 +136,8 @@ public class TrashDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			) {
-				pstmt.setInt(1, memberCd);
-				pstmt.setInt(2, memberCd);
+				pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+				pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
 				pstmt.setString(3, spamWord);
 				pstmt.setString(4, spamWord);
 				pstmt.executeUpdate();

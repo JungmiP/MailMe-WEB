@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import kr.ac.kopo.ui.MailMenuUI;
 import kr.ac.kopo.util.ConnectionFactory;
 import kr.ac.kopo.vo.MailVO;
 import kr.ac.kopo.vo.SelectedMailVO;
@@ -31,49 +32,12 @@ public class MailDAO {
 		}
 	}
 	
-	// 메일 하나 조회
-	public SelectedMailVO selectMail(int mailNo) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID,  m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
-		sql.append("  FROM TBL_MAIL m1 ");
-		sql.append("  JOIN TBL_MEMBER m2 ON m2.MEMBER_CD = m1.MAIL_SENDER_CD ");
-		sql.append("  JOIN TBL_MEMBER m3 ON m3.MEMBER_CD = m1.MAIL_RECEIVER_CD ");
-		sql.append(" WHERE MAIL_CD = ?");
-		
-		try(
-				Connection conn = new ConnectionFactory().getConnection();
-				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
-			){
-				pstmt.setInt(1, mailNo);
-				ResultSet rs = pstmt.executeQuery();
-				
-				if(rs.next()) {
-					int mailCd = rs.getInt("MAIL_CD");
-					String mailTitle = rs.getString("MAIL_TITLE");				
-					String mailContent = rs.getString("MAIL_CONTENT");				
-					String mailSenderId = rs.getString("SENDER_ID");
-					String mailReceiverId = rs.getString("RECEIVER_ID");
-					int mailOpenChk = rs.getInt("MAIL_OPEN_CHK");
-					String mailSentDate = rs.getString("MAIL_SENT_DATE");
-					
-					SelectedMailVO mail = new SelectedMailVO(mailCd, mailTitle, mailContent, mailSenderId, mailReceiverId, mailOpenChk, mailSentDate);
-					return mail;
-				}
-				
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
-		
-		
-		return null;
-	}
-	
 	// 받은 메일 전체 조회
-	public List<SelectedMailVO> selectAllMails(String mode, int memberCd) {
+	public List<SelectedMailVO> selectAllMails(String mode ) {
 		List<SelectedMailVO> list = new ArrayList<>();
 		
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID,  m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
+		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID,  m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
 		sql.append("  FROM TBL_MAIL m1 ");
 		sql.append("  JOIN TBL_MEMBER m2 ON m2.MEMBER_CD = m1.MAIL_SENDER_CD ");
 		sql.append("  JOIN TBL_MEMBER m3 ON m3.MEMBER_CD = m1.MAIL_RECEIVER_CD ");
@@ -86,19 +50,20 @@ public class MailDAO {
 			Connection conn = new ConnectionFactory().getConnection();
 			PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 		){
-			pstmt.setInt(1, memberCd);
-			pstmt.setInt(2, memberCd);
+			pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+			pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
 			ResultSet rs = pstmt.executeQuery();
 			
 			while(rs.next()) {
 				int mailCd = rs.getInt("MAIL_CD");
-				String mailTitle = rs.getString("MAIL_TITLE");				
+				String mailTitle = rs.getString("MAIL_TITLE");
+				String mailContent = rs.getString("MAIL_CONTENT");
 				String mailSenderId = rs.getString("SENDER_ID");
 				String mailReceiverId = rs.getString("RECEIVER_ID");
 				int mailOpenChk = rs.getInt("MAIL_OPEN_CHK");
 				String mailSentDate = rs.getString("MAIL_SENT_DATE");
 				
-				SelectedMailVO mail = new SelectedMailVO(mailCd, mailTitle, mailSenderId, mailReceiverId, mailOpenChk, mailSentDate);
+				SelectedMailVO mail = new SelectedMailVO(mailCd, mailTitle, mailContent, mailSenderId, mailReceiverId, mailOpenChk, mailSentDate);
 				list.add(mail);
 			}
 			
@@ -109,11 +74,11 @@ public class MailDAO {
 	}
 	
 	
-	public List<SelectedMailVO> selectAllMails(String mode, int memberCd ,String spamWord) {
+	public List<SelectedMailVO> selectAllMails(String mode, String spamWord) {
 		List<SelectedMailVO> list = new ArrayList<>();
 		
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID, m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
+		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID, m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
 		sql.append("  FROM TBL_MAIL m1 ");
 		sql.append("  JOIN TBL_MEMBER m2 ON m2.MEMBER_CD = m1.MAIL_SENDER_CD ");
 		sql.append("  JOIN TBL_MEMBER m3 ON m3.MEMBER_CD = m1.MAIL_RECEIVER_CD ");
@@ -128,8 +93,8 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 				){
-			pstmt.setInt(1, memberCd);
-			pstmt.setInt(2, memberCd);
+			pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+			pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
 			pstmt.setString(3, spamWord);
 			pstmt.setString(4, spamWord);
 			ResultSet rs = pstmt.executeQuery();
@@ -137,12 +102,13 @@ public class MailDAO {
 			while(rs.next()) {
 				int mailCd = rs.getInt("MAIL_CD");
 				String mailTitle = rs.getString("MAIL_TITLE");
+				String mailContent = rs.getString("MAIL_CONTENT");
 				String mailSenderId = rs.getString("SENDER_ID");
 				String mailReceiverId = rs.getString("RECEIVER_ID");
 				int mailOpenChk = rs.getInt("MAIL_OPEN_CHK");
 				String mailSentDate = rs.getString("MAIL_SENT_DATE");
 				
-				SelectedMailVO mail = new SelectedMailVO(mailCd, mailTitle, mailSenderId, mailReceiverId, mailOpenChk, mailSentDate);
+				SelectedMailVO mail = new SelectedMailVO(mailCd, mailTitle, mailContent, mailSenderId, mailReceiverId, mailOpenChk, mailSentDate);
 				list.add(mail);
 			}
 			
@@ -154,10 +120,10 @@ public class MailDAO {
 	
 	
 	// 검색어로 받은 메일 조회
-	public List<SelectedMailVO> selectMailsByWord(String mode, int memberCd, String word) {
+	public List<SelectedMailVO> selectMailsByWord(String mode, String word) {
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID, m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
+		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID, m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
 		sql.append("  FROM TBL_MAIL m1 ");
 		sql.append("  JOIN TBL_MEMBER m2 ON m2.MEMBER_CD = m1.MAIL_SENDER_CD ");
 		sql.append("  JOIN TBL_MEMBER m3 ON m3.MEMBER_CD = m1.MAIL_RECEIVER_CD ");
@@ -171,8 +137,8 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			){
-			    pstmt.setInt(1, memberCd);
-			    pstmt.setInt(2, memberCd);
+			    pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+			    pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
 				pstmt.setString(3, word);
 				pstmt.setString(4, word);
 				ResultSet rs = pstmt.executeQuery();
@@ -180,12 +146,13 @@ public class MailDAO {
 				while(rs.next()) {
 					int mailCd = rs.getInt("MAIL_CD");
 					String mailTitle = rs.getString("MAIL_TITLE");
+					String mailContent = rs.getString("MAIL_CONTENT");
 					String mailSenderId = rs.getString("SENDER_ID");
 					String mailReceiverId = rs.getString("RECEIVER_ID");
 					int mailOpenChk = rs.getInt("MAIL_OPEN_CHK");
 					String mailSentDate = rs.getString("MAIL_SENT_DATE");
 					
-					SelectedMailVO mail = new SelectedMailVO(mailCd, mailTitle, mailSenderId, mailReceiverId, mailOpenChk, mailSentDate);
+					SelectedMailVO mail = new SelectedMailVO(mailCd, mailTitle, mailContent, mailSenderId, mailReceiverId, mailOpenChk, mailSentDate);
 					list.add(mail);
 				}
 				
@@ -195,7 +162,7 @@ public class MailDAO {
 			return list;
 	}
 	
-	public List<SelectedMailVO> selectMailsByWord(String mode, int memberCd, String word, String spamWord) {
+	public List<SelectedMailVO> selectMailsByWord(String mode, String word, String spamWord) {
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID, m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
@@ -214,8 +181,8 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			){
-			    pstmt.setInt(1, memberCd);
-			    pstmt.setInt(2, memberCd);
+			    pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+			    pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
 				pstmt.setString(3, word);
 				pstmt.setString(4, word);
 				pstmt.setString(5, spamWord);
@@ -260,7 +227,7 @@ public class MailDAO {
 	
 	// 휴지통 메일 가져오기
 	
-	public List<SelectedMailVO> selectAllTrashMails(int memberCd){
+	public List<SelectedMailVO> selectAllTrashMails(){
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m3.MEMBER_ID AS SENDER_ID, m4.MEMBER_ID AS RECEIVER_ID , m1.MAIL_SENT_DATE, M2.TRASH_CD ");
@@ -275,7 +242,7 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			){
-				pstmt.setInt(1, memberCd);
+				pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
 				ResultSet rs = pstmt.executeQuery();
 				
 				while(rs.next()) {
@@ -298,7 +265,7 @@ public class MailDAO {
 	}
 
 	// 휴지통 메일 검색하기
-	public List<SelectedMailVO> selectTrashMailsByWord(String word, int memberCd) {
+	public List<SelectedMailVO> selectTrashMailsByWord(String word) {
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT M1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS sender_id, M3.MEMBER_ID AS RECEIVER_ID, M1.MAIL_SENT_DATE, T1.TRASH_CD ");
@@ -314,8 +281,8 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			){
-			    pstmt.setInt(1, memberCd);
-			    pstmt.setInt(2, memberCd);
+			    pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+			    pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
 				pstmt.setString(3, word);
 				pstmt.setString(4, word);
 				ResultSet rs = pstmt.executeQuery();
@@ -341,7 +308,7 @@ public class MailDAO {
 	}
 	
 	// 내게 쓴 메일 조회
-	public List<SelectedMailVO> selectAllSelfMails(int memberCd) {
+	public List<SelectedMailVO> selectAllSelfMails() {
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, M3.MEMBER_ID AS RECEIVER_ID, m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE ");
@@ -356,9 +323,9 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			){
-				pstmt.setInt(1, memberCd);
-				pstmt.setInt(2, memberCd);
-				pstmt.setInt(3, memberCd);
+				pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+				pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
+				pstmt.setInt(3, MailMenuUI.loginMember.getMemberCd());
 				ResultSet rs = pstmt.executeQuery();
 				
 				while(rs.next()) {
@@ -380,7 +347,7 @@ public class MailDAO {
 	}
 	
 	// 내게 쓴 메일함 검색
-	public List<SelectedMailVO> selectSelfMailsByWord(String word, int memberCd) {
+	public List<SelectedMailVO> selectSelfMailsByWord(String word) {
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, M3.MEMBER_ID AS RECEIVER_ID, m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE ");
@@ -396,9 +363,9 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			){
-				pstmt.setInt(1, memberCd);
-				pstmt.setInt(2, memberCd);
-				pstmt.setInt(3, memberCd);
+				pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
+				pstmt.setInt(2, MailMenuUI.loginMember.getMemberCd());
+				pstmt.setInt(3, MailMenuUI.loginMember.getMemberCd());
 				pstmt.setString(4, word);
 				pstmt.setString(5, word);
 				ResultSet rs = pstmt.executeQuery();
@@ -422,7 +389,7 @@ public class MailDAO {
 	}
 	
 	// 안읽은 메일 조회
-	public List<SelectedMailVO> selectUnreadMails(String mode, int memberCd) {
+	public List<SelectedMailVO> selectUnreadMails(String mode) {
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID, m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
@@ -439,7 +406,7 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 				){
-			pstmt.setInt(1, memberCd);
+			pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
 			ResultSet rs = pstmt.executeQuery();
 			
 			while(rs.next()) {
@@ -461,7 +428,7 @@ public class MailDAO {
 		return list;
 	}
 	
-	public List<SelectedMailVO> selectUnreadMails(String mode, int memberCd, String spamWord) {
+	public List<SelectedMailVO> selectUnreadMails(String mode, String spamWord) {
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID, m1.MAIL_OPEN_CHK, m1.MAIL_SENT_DATE");
@@ -480,7 +447,7 @@ public class MailDAO {
 			Connection conn = new ConnectionFactory().getConnection();
 			PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 		){
-			pstmt.setInt(1, memberCd);
+			pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
 			pstmt.setString(2, spamWord);
 			pstmt.setString(3, spamWord);
 			ResultSet rs = pstmt.executeQuery();
@@ -506,7 +473,7 @@ public class MailDAO {
 	
 	
 	// 스팸 메일 조회하기
-	public List<SelectedMailVO> selectSpamMails(String spamWord, int memberCd){
+	public List<SelectedMailVO> selectSpamMails(String spamWord){
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID ,m1.MAIL_SENT_DATE");
@@ -522,7 +489,7 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			){
-				pstmt.setInt(1, memberCd);
+				pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
 				pstmt.setString(2, spamWord);
 				pstmt.setString(3, spamWord);
 				ResultSet rs = pstmt.executeQuery();
@@ -545,7 +512,7 @@ public class MailDAO {
 	}
 	
 	// 스팸 메일 검색 조회
-	public List<SelectedMailVO> selectSpamMailsByWord(String spamWord, int memberCd, String word){
+	public List<SelectedMailVO> selectSpamMailsByWord(String spamWord, String word){
 		List<SelectedMailVO> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT m1.MAIL_CD, m1.MAIL_TITLE, m1.MAIL_CONTENT, m2.MEMBER_ID AS SENDER_ID, m3.MEMBER_ID AS RECEIVER_ID ,m1.MAIL_SENT_DATE");
@@ -562,7 +529,7 @@ public class MailDAO {
 				Connection conn = new ConnectionFactory().getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 				){
-			pstmt.setInt(1, memberCd);
+			pstmt.setInt(1, MailMenuUI.loginMember.getMemberCd());
 			pstmt.setString(2, spamWord);
 			pstmt.setString(3, spamWord);
 			pstmt.setString(4, word);
