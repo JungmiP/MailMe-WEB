@@ -23,3 +23,10 @@
 hs_err_pid*
 replay_pid*
 /build/
+
+/.metadata/
+/.recommenders/
+.classpath
+.project
+.gitignore
+.settings/
